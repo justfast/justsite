@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Stili globali professionali */
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Professional shadows */
+.shadow-professional {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.shadow-professional-hover {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Elegant gradients */
+.gradient-elegant {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 50%, transparent 100%);
+}
+
+/* Smooth transitions */
+.transition-professional {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Animazione gradiente per il testo */
 @keyframes gradient-flow {
   0%, 100% {
@@ -30,4 +66,123 @@
 
 .animate-zoom-in {
   animation: zoom-in 1.5s ease-out forwards;
+}
+
+/* Animazione fade-in-up */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out both;
+}
+
+.animate-fade-in-up-delay-1 {
+  animation: fade-in-up 0.6s ease-out 1s both;
+}
+
+/* Animazione respiro per il logo */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Animazione bounce sottile */
+@keyframes bounce-subtle {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Stili personalizzati per select dropdown */
+select option {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  color: white !important;
+  padding: 8px 12px !important;
+  border: none !important;
+}
+
+select option:hover {
+  background-color: rgba(55, 65, 81, 0.95) !important;
+}
+
+select option:checked {
+  background-color: rgba(239, 68, 68, 0.8) !important;
+  color: white !important;
+}
+
+/* Miglioramento del dropdown per browser WebKit */
+select::-webkit-scrollbar {
+  width: 8px;
+}
+
+select::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.8);
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: rgba(239, 68, 68, 0.6);
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: rgba(239, 68, 68, 0.8);
+}
+
+/* Lightbox animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out;
 }

@@ -1,0 +1,60 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "WLtoys 6401 RC",
+      "price": 49,
+      "image": "/images/remote-car-copertina/1.webp",
+      "description": "Compatta, veloce e precisa. Una vera auto da gara in scala 1:64, perfetta per sfrecciare ovunque.",
+      "category": "telecomando",
+      "features": [
+        "Scala 1:64",
+        "Batteria ricaricabile",
+        "Controller 2.4GHz incluso",
+        "Fari LED"
+      ],
+      "specifications": {
+        "Scala": "1:64",
+        "Batteria": "Ricaricabile Li-Po",
+        "Frequenza": "2.4GHz",
+        "Velocità": "Fino a 25 km/h",
+        "Materiale": "ABS resistente"
+      },
+      "gallery": [
+        "/images/remote-car-copertina/1.webp",
+        "/images/remote-car-copertina/13.webp",
+        "/images/remote-car-copertina/14.webp",
+        "/images/remote-car/1.webp",
+        "/images/remote-car/2.webp"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "WLtoys 6401 Wi-Fi",
+      "price": 39,
+      "image": "/images/app-car-copertina/1.webp",
+      "description": "Controllala dal telefono, guardala correre in FPV, vivila ovunque. Perfetta per chi vuole vivere la corsa in prima persona.",
+      "category": "app smartphone",
+      "features": [
+        "Controllo via app",
+        "Streaming in diretta",
+        "Camera onboard",
+        "Batteria integrata"
+      ],
+      "specifications": {
+        "Controllo": "App smartphone",
+        "Camera": "HD 720p",
+        "Connessione": "Wi-Fi",
+        "Batteria": "Integrata ricaricabile",
+        "Compatibilità": "iOS/Android"
+      },
+      "gallery": [
+        "/images/app-car-copertina/1.webp",
+        "/images/app-car-copertina/22.PNG",
+        "/images/app-car-copertina/33.PNG",
+        "/images/app-car/1.webp",
+        "/images/app-car/2.webp"
+      ]
+    }
+  ]
+}

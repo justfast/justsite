@@ -51,29 +51,13 @@ const TypingText: React.FC<TypingTextProps> = ({
 
   return (
     <span ref={ref} className={`${className} relative inline-block`}>
-      <span 
-        className="bg-gradient-to-r from-red-500 via-white to-orange-500 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%]"
-        style={{
-          backgroundImage: 'linear-gradient(45deg, #ef4444, #ffffff, #f97316, #ef4444)',
-          backgroundSize: '200% 200%',
-          animation: 'gradient-flow 3s ease-in-out infinite'
-        }}
-      >
+      <span>
         {hasStarted ? displayedText : ''}
       </span>
       {showCursor && hasStarted && !isComplete && (
         <span className="animate-pulse text-red-600">|</span>
       )}
-      <style jsx>{`
-        @keyframes gradient-flow {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-      `}</style>
+
     </span>
   );
 };

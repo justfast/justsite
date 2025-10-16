@@ -1,138 +1,201 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import Homepage from './components/Homepage';
 import Shop from './components/Shop';
-import Technology from './components/Technology';
-import Events from './components/Events';
-import About from './components/About';
-import Contact from './components/Contact';
 import Cart from './components/Cart';
 import ProductDetail from './components/ProductDetail';
-import { Product } from './data/products';
+import About from './components/About';
+import Technology from './components/Technology';
+import Events from './components/Events';
+import Contact from './components/Contact';
+import Account from './components/Account';
+import Checkout from './components/Checkout';
+import AuthModal from './components/AuthModal';
+import SuccessPopup from './components/SuccessPopup';
 
-interface CartItem {
-  id: string;
+export interface Product {
+  id: number;
   name: string;
   price: number;
-  quantity: number;
   image: string;
+  description: string;
+  category: string;
+  features: string[];
+  specifications: {
+    [key: string]: string;
+  };
+  gallery: string[];
+}
+
+export interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
 }
 
 function App() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/products.json');
+        const data = await response.json();
+        setProducts(data.products);
+      } catch (error) {
+        console.error('Errore nel caricamento dei prodotti:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const addToCart = (product: Product) => {
-    setCartItems(prev => {
-      const existingItem = prev.find(item => item.id === product.id);
+    setCartItems(prevItems => {
+      const existingItem = prevItems.find(item => item.id === product.id);
       if (existingItem) {
-        return prev.map(item =>
+        return prevItems.map(item =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
+      } else {
+        return [...prevItems, {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1
+        }];
       }
-      return [...prev, {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        image: product.image
-      }];
     });
+    
+    setSuccessMessage(`${product.name} aggiunto al carrello!`);
+    setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const removeFromCart = (productId: number) => {
+    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId: number, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(productId);
       return;
     }
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
+    
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === productId ? { ...item, quantity } : item
       )
     );
   };
 
-  const removeFromCart = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+  const clearCart = () => {
+    setCartItems([]);
   };
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  const handleBuyNow = (product: Product, quantity: number) => {
-    // Add the product to cart with the specified quantity
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product);
-    }
-    // Open the cart
-    setIsCartOpen(true);
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
+
+  const getTotalItems = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Caricamento...</div>
+      </div>
+    );
+  }
 
   return (
-    <Router>
-      <div className="min-h-screen bg-black text-white">
-        <Navbar 
-          cartCount={totalItems} 
-          onCartClick={() => setIsCartOpen(true)} 
-        />
-        
-        <Routes>
-          <Route path="/" element={
-            <>
-              <Hero />
-              <Shop onAddToCart={addToCart} />
-              <Technology />
-              <Events />
-              <About />
-              <Contact />
-            </>
-          } />
-          <Route 
-            path="/product/:productId" 
-            element={
-              <ProductDetail 
-                onAddToCart={addToCart}
-                onBuyNow={handleBuyNow}
-              />
-            } 
+    <PayPalScriptProvider options={{
+      clientId: "test",
+      currency: "EUR"
+    }}>
+      <Router>
+        <div className="min-h-screen bg-black text-white">
+          <Navbar 
+            cartItemsCount={getTotalItems()}
+            onCartClick={() => setIsCartOpen(true)}
+            onAuthClick={() => setIsAuthModalOpen(true)}
           />
-          {/* Catch-all route to redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        
-        <Cart
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          items={cartItems}
-          onUpdateQuantity={updateQuantity}
-          onRemoveItem={removeFromCart}
-        />
+          
+          <Routes>
+            <Route path="/" element={
+              <Homepage 
+                products={products}
+                onAddToCart={addToCart}
+                onProductClick={setSelectedProduct}
+              />
+            } />
+            <Route path="/shop" element={
+              <Shop 
+                products={products}
+                onAddToCart={addToCart}
+                onProductClick={setSelectedProduct}
+              />
+            } />
+            <Route path="/about" element={<About />} />
+            <Route path="/technology" element={<Technology />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/checkout" element={
+              <Checkout 
+                cartItems={cartItems}
+                totalPrice={getTotalPrice()}
+                onClearCart={clearCart}
+              />
+            } />
+          </Routes>
 
-        {/* Footer */}
-        <footer className="bg-black border-t border-gray-800 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-4">
-            <h3 className="text-2xl font-bold text-white">
-              <span className="text-red-600">Just</span>Fast
-            </h3>
-          </div>
-          <p className="text-gray-400 mb-4">
-            L'esperienza di guida RC FPV più coinvolgente mai vista
-          </p>
-          <div className="flex justify-center space-x-6 text-sm text-gray-400">
-            <span>📞 3914750406</span>
-            <span>📧 gianni.mancarella@gmail.com</span>
-            <span>🗺️ Italia</span>
-          </div>
-          <div className="mt-4 pt-4 border-t border-gray-800 text-sm text-gray-500">
-            © 2024 JustFast. Tutti i diritti riservati.
-          </div>
+          <Cart 
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            items={cartItems}
+            onUpdateQuantity={updateQuantity}
+            onRemoveItem={removeFromCart}
+            totalPrice={getTotalPrice()}
+          />
+
+          {selectedProduct && (
+            <ProductDetail 
+              product={selectedProduct}
+              onClose={() => setSelectedProduct(null)}
+              onAddToCart={addToCart}
+            />
+          )}
+
+          <AuthModal 
+            isOpen={isAuthModalOpen}
+            onClose={() => setIsAuthModalOpen(false)}
+          />
+
+          {showSuccessPopup && (
+            <SuccessPopup message={successMessage} />
+          )}
         </div>
-      </footer>
-    </div>
-    </Router>
+      </Router>
+    </PayPalScriptProvider>
   );
 }
 
