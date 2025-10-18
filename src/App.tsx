@@ -1,4 +1,4 @@
-//App.tsx
+// App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
@@ -84,7 +84,7 @@ function App() {
         }];
       }
     });
-    
+
     setSuccessMessage(`${product.name} aggiunto al carrello!`);
     setShowSuccessPopup(true);
     setTimeout(() => setShowSuccessPopup(false), 3000);
@@ -99,7 +99,7 @@ function App() {
       removeFromCart(productId);
       return;
     }
-    
+
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === productId ? { ...item, quantity } : item
@@ -135,10 +135,12 @@ function App() {
       <Router>
         <div className="min-h-screen bg-black text-white">
           <Navbar 
-            cartItemsCount={getTotalItems()}
+            cartCount={getTotalItems()}   // ← qui deve chiamarsi cartCount
             onCartClick={() => setIsCartOpen(true)}
-            onAuthClick={() => setIsAuthModalOpen(true)}
+            isAuthModalOpen={isAuthModalOpen}
+            setIsAuthModalOpen={setIsAuthModalOpen}
           />
+
           
           <Routes>
             <Route path="/" element={
@@ -151,7 +153,6 @@ function App() {
             <Route path="/shop" element={
               <Shop 
                 products={products}
-                setCarrello = {setCartItems}
                 onAddToCart={addToCart}
                 onProductClick={setSelectedProduct}
               />
@@ -182,8 +183,6 @@ function App() {
           {selectedProduct && (
             <ProductDetail 
               product={selectedProduct}
-             
-              setCarrello = {setCartItems}
               onClose={() => setSelectedProduct(null)}
               onAddToCart={addToCart}
             />
