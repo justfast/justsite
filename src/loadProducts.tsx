@@ -16,16 +16,16 @@ export const loadProductsData = async (): Promise<Product[]> => {
   const MAX_SCAN = 1000; // numero massimo di ID da controllare
   for (let id = 1; id <= MAX_SCAN; id++) {
     try {
-      const mainRes = await fetch(`/public/articoli/${id}/main.json`);
+      const mainRes = await fetch(`/articoli/${id}/main.json`);
       if (!mainRes.ok) break; // se non esiste, fermiamo il ciclo
       const mainData = await mainRes.json();
 
-      const mainImage = `/public/articoli/${id}/image.png`;
+      const mainImage = `/articoli/${id}/image.png`;
 
       // Galleria immagini
       const gallery: string[] = [mainImage];
       for (let g = 1; g <= 10; g++) {
-        const imgUrl = `/public/articoli/${id}/${g}.png`;
+        const imgUrl = `/articoli/${id}/${g}.png`;
         const imgRes = await fetch(imgUrl);
         if (!imgRes.ok) break;
         gallery.push(imgUrl);
