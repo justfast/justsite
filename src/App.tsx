@@ -1,3 +1,4 @@
+//App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
@@ -150,6 +151,7 @@ function App() {
             <Route path="/shop" element={
               <Shop 
                 products={products}
+                setCarrello = {setCartItems}
                 onAddToCart={addToCart}
                 onProductClick={setSelectedProduct}
               />
@@ -180,6 +182,8 @@ function App() {
           {selectedProduct && (
             <ProductDetail 
               product={selectedProduct}
+             
+              setCarrello = {setCartItems}
               onClose={() => setSelectedProduct(null)}
               onAddToCart={addToCart}
             />
