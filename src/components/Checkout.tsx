@@ -186,7 +186,7 @@ const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
 
 // Wrapper con PayPalScriptProvider
 const Checkout: React.FC<CheckoutProps> = (props) => {
-  const clientIdSandbox = "AWzXcKsG2MslkQLwkejLScT94ysTg_NFb-U5o6CntrwB4oGt1Ejnl7uMIuNc98c-H3oKooKSMvZp0EpC"; // sostituisci con il tuo client-id sandbox
+  const clientIdSandbox = ""; // sostituisci con il tuo client-id sandbox
   return (
     <PayPalScriptProvider options={{ "client-id": clientIdSandbox, currency: "EUR" }}>
       <CheckoutInner {...props} />
