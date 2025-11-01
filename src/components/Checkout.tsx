@@ -1,27 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { PayPalButtons } from '@paypal/react-paypal-js';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { sendEventBookingEmail } from '../config/emailjs';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-
-
-//decrementa lo stock su Firebase dopo un ordine completato
-const decreaseStock = async (items: CartItem[]) => {
-  try {
-    const updates = items.map(async (item) => {
-      const productRef = doc(db, 'stock', item.id); // collection 'stock', doc id = item.id
-      await updateDoc(productRef, {
-        stock: increment(-item.quantity) // decrementa lo stock
-      });
-    });
-    await Promise.all(updates);
-    console.log('Stock aggiornato correttamente su Firebase!');
-  } catch (err) {
-    console.error('Errore aggiornando lo stock:', err);
-  }
-};
 
 interface CartItem {
   id: string;
@@ -37,7 +20,23 @@ interface CheckoutProps {
   onClose: () => void;
 }
 
-const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
+// decrementa lo stock su Firebase dopo un ordine completato
+const decreaseStock = async (items: CartItem[]) => {
+  try {
+    const updates = items.map(async (item) => {
+      const productRef = doc(db, 'stock', item.id);
+      await updateDoc(productRef, {
+        stock: increment(-item.quantity),
+      });
+    });
+    await Promise.all(updates);
+    console.log('Stock aggiornato correttamente su Firebase!');
+  } catch (err) {
+    console.error('Errore aggiornando lo stock:', err);
+  }
+};
+
+const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
   const navigate = useNavigate();
   const [shippingData, setShippingData] = useState({
     name: '',
@@ -54,7 +53,6 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
     setShippingData({ ...shippingData, [e.target.name]: e.target.value });
   };
 
-  // controlla se tutti i campi sono compilati
   const isFormValid = Object.values(shippingData).every(v => v.trim() !== '');
 
   const createOrder = (data: any, actions: any) => {
@@ -73,13 +71,13 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
     try {
       const details = await actions.order.capture();
       alert(`Pagamento completato! Grazie ${details.payer.name.given_name}`);
-      await decreaseStock(items); // aggiorna lo stock su Firebase
+      await decreaseStock(items);
       await sendEventBookingEmail({
         data_evento: new Date().toLocaleString(),
         email: 'gianni.mancarella@gmail.com',
         ore: items.length,
         prezzo: total,
-        dettagli: `Dettagli spedizione: Nome: ${shippingData.name}, Via: ${shippingData.address}, Città: ${shippingData.city}, CAP: ${shippingData.zip}, Paese: ${shippingData.country}, Telefono: ${shippingData.phone}, Prodotti: ${itemsSummary}`,
+        dettagli: `Dettagli spedizione: Nome: ${shippingData.name}, Via: ${shippingData.address}, Città: ${shippingData.city}, CAP: ${shippingData.zip}, Paese: ${shippingData.country}, Telefono: ${shippingData.phone}, Prodotti: ${items.map(i => i.name).join(', ')}`,
         richiesta_data: new Date().toLocaleString()
       });
       onClose();
@@ -161,12 +159,14 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Metodo di pagamento</h3>
           <PayPalButtons
+            fundingSource="card"
             createOrder={createOrder}
             onApprove={onApprove}
             onError={onError}
-            style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal' }}
-            disabled={!isFormValid} //  disabilita se dati incompleti
+            style={{ layout: 'vertical', color: 'black', shape: 'rect', label: 'pay' }}
+            disabled={!isFormValid}
           />
+
           <p className="text-sm text-gray-600 mt-3 text-center">
             Pagamento sicuro e protetto tramite PayPal
           </p>
@@ -181,6 +181,16 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
 
       </div>
     </div>
+  );
+};
+
+// Wrapper con PayPalScriptProvider
+const Checkout: React.FC<CheckoutProps> = (props) => {
+  const clientIdSandbox = "AWzXcKsG2MslkQLwkejLScT94ysTg_NFb-U5o6CntrwB4oGt1Ejnl7uMIuNc98c-H3oKooKSMvZp0EpC"; // sostituisci con il tuo client-id sandbox
+  return (
+    <PayPalScriptProvider options={{ "client-id": clientIdSandbox, currency: "EUR" }}>
+      <CheckoutInner {...props} />
+    </PayPalScriptProvider>
   );
 };
 
