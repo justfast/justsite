@@ -3,6 +3,25 @@ import { ArrowLeft, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { sendEventBookingEmail } from '../config/emailjs';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+
+
+//decrementa lo stock su Firebase dopo un ordine completato
+const decreaseStock = async (items: CartItem[]) => {
+  try {
+    const updates = items.map(async (item) => {
+      const productRef = doc(db, 'stock', item.id); // collection 'stock', doc id = item.id
+      await updateDoc(productRef, {
+        stock: increment(-item.quantity) // decrementa lo stock
+      });
+    });
+    await Promise.all(updates);
+    console.log('Stock aggiornato correttamente su Firebase!');
+  } catch (err) {
+    console.error('Errore aggiornando lo stock:', err);
+  }
+};
 
 interface CartItem {
   id: string;
@@ -54,6 +73,7 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
     try {
       const details = await actions.order.capture();
       alert(`Pagamento completato! Grazie ${details.payer.name.given_name}`);
+      await decreaseStock(items); // aggiorna lo stock su Firebase
       await sendEventBookingEmail({
         data_evento: new Date().toLocaleString(),
         email: 'gianni.mancarella@gmail.com',

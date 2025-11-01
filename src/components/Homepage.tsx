@@ -22,7 +22,7 @@ const Homepage: React.FC<HomepageProps> = ({ products, onAddToCart, onProductCli
       </section>
       
       {/* Shop Section */}
-      <section id="shop" className="py-20">
+      <section id="shop" className="py-0">
         <Shop 
           products={products}
           onAddToCart={onAddToCart}
@@ -31,22 +31,22 @@ const Homepage: React.FC<HomepageProps> = ({ products, onAddToCart, onProductCli
       </section>
       
       {/* About Section */}
-      <section id="about" className="py-20">
+      <section id="about" className="py-0">
         <About />
       </section>
       
       {/* Technology Section */}
-      <section id="technology" className="py-20">
+      <section id="technology" className="py-0">
         <Technology />
       </section>
       
       {/* Events Section */}
-      <section id="events" className="py-20">
+      <section id="events" className="py-0">
         <Events />
       </section>
       
       {/* Contact Section */}
-      <section id="contact" className="py-20">
+      <section id="contact" className="py-0">
         <Contact />
       </section>
     </div>

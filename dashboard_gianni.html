@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generatore Prodotti Snetch</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+  h1 { text-align: center; color: #b91c1c; }
+  form { background: #fff; padding: 20px; border-radius: 10px; max-width: 700px; margin: auto; }
+  label { display: block; margin-top: 10px; font-weight: bold; }
+  input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+  button { margin-top: 15px; padding: 10px 15px; background: #b91c1c; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background: #991b1b; }
+  .features, .specs { margin-top: 10px; }
+  .feature-item, .spec-item { display: flex; margin-top: 5px; gap: 5px; }
+  .feature-item input, .spec-item input { flex: 1; }
+  .remove-btn { background: #e11d48; border: none; color: white; cursor: pointer; padding: 0 5px; border-radius: 3px; }
+  .remove-btn:hover { background: #be123c; }
+</style>
+</head>
+<body>
+
+<h1>Admin-Generatore Prodotti</h1>
+
+<form id="productForm">
+  <label>Nome prodotto</label>
+  <input type="text" id="name" required>
+
+  <label>Prezzo (€)</label>
+  <input type="number" id="price" step="0.01" required>
+
+  <label>Categoria</label>
+  <input type="text" id="category" required>
+
+  <label>Descrizione</label>
+  <textarea id="description" rows="4" required></textarea>
+
+  <label>Features</label>
+  <div class="features" id="featuresContainer"></div>
+  <button type="button" id="addFeatureBtn">Aggiungi Feature</button>
+
+  <label>Specifications</label>
+  <div class="specs" id="specsContainer"></div>
+  <button type="button" id="addSpecBtn">Aggiungi Spec</button>
+
+  <label>Immagine principale</label>
+  <input type="file" id="mainImage" accept="image/*" required>
+
+  <label>Galleria immagini (multi)</label>
+  <input type="file" id="galleryImages" accept="image/*" multiple>
+
+  <button type="submit">Genera Cartella Prodotto ZIP</button>
+</form>
+
+<p>ISTRUZIONI: le immagini devono essere in png e il formato deve essere scritto in lowecase("1.PNG" non verrebbe accettata). <br><br>
+Ricorda di numerare le immagini della galleria cosi da vederle nell'ordine che vuoi("1.png, 2.png",...)<br><br>
+L'immagine principale deve essere chiamata "main.png".<br><br>
+Attento:ogni volta genera un ID casuale nel file main.json. Segna questo numero perchè sarà l'ID che vedrai nella ricevuta dell'ordine. Se dovesse essere uguale ad un altro ID già presente o se preferisci usare un'altra numerazione cambialo pure.Il sito legge qualsiasi numero di ID.
+</p>
+
+<button onclick="window.location.href='https://console.firebase.google.com/u/5/project/database-justfast/firestore/databases/-default-/data/~2Fstock~2F1'">GESTIONE MAGAZZINO</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script>
+  const featuresContainer = document.getElementById('featuresContainer');
+  const specsContainer = document.getElementById('specsContainer');
+  const addFeatureBtn = document.getElementById('addFeatureBtn');
+  const addSpecBtn = document.getElementById('addSpecBtn');
+  let featureCount = 0;
+  let specCount = 0;
+
+  addFeatureBtn.onclick = () => {
+    const div = document.createElement('div');
+    div.className = 'feature-item';
+    div.innerHTML = `<input type="text" placeholder="Feature">
+                     <button type="button" class="remove-btn">X</button>`;
+    div.querySelector('.remove-btn').onclick = () => div.remove();
+    featuresContainer.appendChild(div);
+    featureCount++;
+  };
+
+  addSpecBtn.onclick = () => {
+    const div = document.createElement('div');
+    div.className = 'spec-item';
+    div.innerHTML = `<input type="text" placeholder="Chiave">
+                     <input type="text" placeholder="Valore">
+                     <button type="button" class="remove-btn">X</button>`;
+    div.querySelector('.remove-btn').onclick = () => div.remove();
+    specsContainer.appendChild(div);
+    specCount++;
+  };
+
+  document.getElementById('productForm').onsubmit = async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const price = parseFloat(document.getElementById('price').value);
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value;
+
+    const features = Array.from(featuresContainer.querySelectorAll('input')).map(f => f.value);
+    const specs = {};
+    Array.from(specsContainer.querySelectorAll('.spec-item')).forEach(div => {
+      const inputs = div.querySelectorAll('input');
+      if(inputs[0].value && inputs[1].value) specs[inputs[0].value] = inputs[1].value;
+    });
+
+    const mainImageFile = document.getElementById('mainImage').files[0];
+    const galleryFiles = Array.from(document.getElementById('galleryImages').files);
+
+    const zip = new JSZip();
+    const nextId = Date.now(); // usa timestamp come ID unico
+    const folder = zip.folder(`articoli/${nextId}`);
+
+    // JSON
+    const jsonData = {
+      id: nextId,
+      name,
+      price,
+      category,
+      description,
+      features,
+      specifications: specs,
+      image: mainImageFile.name,
+      gallery: galleryFiles.map(f => f.name)
+    };
+
+    folder.file('main.json', JSON.stringify(jsonData, null, 2));
+
+    // Main image
+    folder.file(mainImageFile.name, mainImageFile);
+
+    // Gallery
+    galleryFiles.forEach(file => folder.file(file.name, file));
+
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, `prodotto_${nextId}.zip`);
+    alert('ZIP generato! Estrai in public/articoli/');
+  };
+</script>
+
+
+</body>
+</html>

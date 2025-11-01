@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ShoppingCart, User } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
-import { auth } from '../config/firebase';
-import { useAuth } from '../hooks/useAuth';
-import AuthModal from './AuthModal';
+
 
 interface NavbarProps {
   cartCount: number;
@@ -29,7 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({
   const [isLoginButtonPulsing, setIsLoginButtonPulsing] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+
 
   const navItems = [
     { label: 'Shop', href: '#shop' },
@@ -61,24 +58,9 @@ const Navbar: React.FC<NavbarProps> = ({
     setIsOpen(false);
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate('/');
-    } catch (error) {
-      console.error('Errore durante il logout:', error);
-    }
-  };
 
-  useEffect(() => {
-    if (!user) {
-      const interval = setInterval(() => {
-        setIsLoginButtonPulsing(true);
-        setTimeout(() => setIsLoginButtonPulsing(false), 2000);
-      }, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
+
+
 
   return (
     <>
@@ -127,35 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* Auth & Cart */}
             
             <div className="flex items-center space-x-2 sm:space-x-4">
-              {!loading 
-
-              /*       HIDDEN: LOGIN GOOGLE- non implementato 
-              && (
-                <div className="relative">
-                  {user ? (
-                    <Link
-                      to="/account"
-                      className="flex items-center space-x-1 sm:space-x-2 bg-red-600 hover:bg-red-700 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors duration-300"
-                    >
-                      <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span>Account</span>
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => setIsAuthModalOpen(true)}
-                      className={`bg-red-600 hover:bg-red-700 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-300 ${
-                        isLoginButtonPulsing ? 'login-pulse' : ''
-                      }`}
-                    >
-                      Accedi
-                    </button>
-                  )}
-                </div>
-              /* 
-              }
-                
-              )}
-
+              
               {/* Carrello con badge */}
               <div className="relative">
                 <button
@@ -204,11 +158,7 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Auth Modal */}
-        <AuthModal 
-          isOpen={isAuthModalOpen} 
-          onClose={() => setIsAuthModalOpen(false)}
-          onLoginSuccess={onLoginSuccess}
-        />
+      
       </nav>
     </>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import Checkout from './Checkout';
+import { getStockById } from '../getStockFromFirebase';
 
 interface CartItem {
   id: string;
@@ -30,6 +31,19 @@ const Cart: React.FC<CartProps> = ({
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   if (!isOpen) return null;
+
+  const handleProceedToCheckout = async () => {
+    // check stock per ogni prodotto
+    for (const item of items) {
+      const available = await getStockById(item.id.toString());
+      if (item.quantity > available) {
+        alert(`Non ci sono abbastanza ${item.name} in stock. Quantità massima disponibile: ${available}`);
+        return; // blocca l'apertura del checkout
+      }
+    }
+    // tutto ok, apri checkout
+    setIsCheckoutOpen(true);
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -115,7 +129,7 @@ const Cart: React.FC<CartProps> = ({
                 <span className="text-xl sm:text-2xl font-bold text-red-600">€{total.toFixed(2)}</span>
               </div>
               <button 
-                onClick={() => setIsCheckoutOpen(true)}
+                onClick={handleProceedToCheckout} // ← check stock prima del checkout
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 sm:py-3 rounded-lg transition-colors duration-300 text-sm sm:text-base"
               >
                 Procedi al checkout

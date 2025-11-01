@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Package, Activity, MessageCircle, User, Mail, Phone, MapPin, LogOut, Calendar, X } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
-import { signOut } from 'firebase/auth';
-import { auth } from '../config/firebase';
+
+
 import { useNavigate } from 'react-router-dom';
 
 interface CartItem {
@@ -22,13 +21,13 @@ interface AccountProps {
 }
 
 const Account: React.FC<AccountProps> = ({ userEmail, cartItems = [], onUpdateQuantity, onRemoveItem }) => {
-  const { user } = useAuth();
+
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);

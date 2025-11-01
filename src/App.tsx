@@ -14,7 +14,6 @@ import Events from './components/Events';
 import Contact from './components/Contact';
 import Account from './components/Account';
 import Checkout from './components/Checkout';
-import AuthModal from './components/AuthModal';
 import SuccessPopup from './components/SuccessPopup';
 
 export interface Product {
@@ -29,7 +28,9 @@ export interface Product {
     [key: string]: string;
   };
   gallery: string[];
+  stock?: number; // per numero magazzino 
 }
+
 
 export interface CartItem {
   id: number;
@@ -188,14 +189,7 @@ function App() {
             />
           )}
 
-          <AuthModal 
-            isOpen={isAuthModalOpen}
-            onClose={() => setIsAuthModalOpen(false)}
-          />
-
-          {showSuccessPopup && (
-            <SuccessPopup message={successMessage} />
-          )}
+         
         </div>
       </Router>
     </PayPalScriptProvider>
