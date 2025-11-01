@@ -24,7 +24,7 @@ interface CheckoutProps {
 const decreaseStock = async (items: CartItem[]) => {
   try {
     const updates = items.map(async (item) => {
-      const productRef = doc(db, 'stock', item.id);
+      const productRef = doc(db, 'stock', item.id.toString());
       await updateDoc(productRef, {
         stock: increment(-item.quantity),
       });
