@@ -77,7 +77,13 @@ const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
         email: 'gianni.mancarella@gmail.com',
         ore: items.length,
         prezzo: total,
-        dettagli: `Dettagli spedizione: Nome: ${shippingData.name}, Via: ${shippingData.address}, Città: ${shippingData.city}, CAP: ${shippingData.zip}, Paese: ${shippingData.country}, Telefono: ${shippingData.phone}, Prodotti: ${items.map(i => i.name).join(', ')}`,
+        dettagli: `Dettagli spedizione:
+              Nome: ${shippingData.name}
+              Indirizzo: ${shippingData.address}, ${shippingData.city}, ${shippingData.zip}, ${shippingData.country}
+              Telefono: ${shippingData.phone}
+              Prodotti:
+              ${items.map(i => `- ${i.name} x${i.quantity} (${(i.price * i.quantity).toFixed(2)}€)`).join('\n')}
+              Totale ordine: €${total.toFixed(2)}`,
         richiesta_data: new Date().toLocaleString()
       });
       onClose();
@@ -187,7 +193,7 @@ const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
 // Wrapper con PayPalScriptProvider
 const Checkout: React.FC<CheckoutProps> = (props) => {
   // 👉 Inserisci qui il tuo client-id (sandbox o live, quello che vuoi usare)
-  const PAYPAL_CLIENT_ID = "AWzXcKsG2MslkQLwkejLScT94ysTg_NFb-U5o6CntrwB4oGt1Ejnl7uMIuNc98c-H3oKooKSMvZp0EpC";
+  const PAYPAL_CLIENT_ID = "";
 
   return (
     <PayPalScriptProvider
