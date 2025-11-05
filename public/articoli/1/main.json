@@ -1,7 +1,7 @@
 {
   "id": 1,
   "name": "Nome Prodotto",
-  "price": 0.1,
+  "price": 2.99,
   "category": "Categoria",
   "description": "Prodotto di test. inserisci la escrizione qui",
   "features": [
