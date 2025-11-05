@@ -193,7 +193,7 @@ const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
 // Wrapper con PayPalScriptProvider
 const Checkout: React.FC<CheckoutProps> = (props) => {
   // 👉 Inserisci qui il tuo client-id (sandbox o live, quello che vuoi usare)
-  const PAYPAL_CLIENT_ID = "AVH-fUI-AXdjP5lUjnZKZ5qCBphInIzSk1-tf-TCAF_JYoN25OZBysN6DqtN04WeTie7sXxSOQ0cpqW1I1KvIHPM";
+  const PAYPAL_CLIENT_ID = "AXdjP5lUjnZKZ5qCBphInIzSk1-tf-TCAF_JYoN25OZBysN6DqtN04WeTie7sXxSOQ0cpqW1I1KvIHPM";
 
   return (
     <PayPalScriptProvider

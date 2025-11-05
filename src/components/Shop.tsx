@@ -216,6 +216,8 @@ const productsWithStock = await Promise.all(
 )}
 
     </section>
+
+  
   );
 };
 
