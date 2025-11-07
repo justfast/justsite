@@ -148,7 +148,7 @@ const Contact: React.FC<ContactProps> = ({ userEmail }) => {
           {/* Contact Form */}
           <div className="glass-effect rounded-3xl p-4 sm:p-6 lg:p-8 border border-white/10 shadow-professional-hover">
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
-              Richiedi informazioni
+              Richiedi Assistenza
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">

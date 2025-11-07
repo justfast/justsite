@@ -191,7 +191,20 @@ const productsWithStock = await Promise.all(
               </ul>
             </div>
           )}
-
+          {selectedProduct.specifications && Object.keys(selectedProduct.specifications).length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-xl font-semibold mb-2">Specifiche Tecniche</h4>
+              <ul className="space-y-1">
+                {/* Iteriamo sulle chiavi e valori dell'oggetto specifications */}
+                {Object.entries(selectedProduct.specifications).map(([key, value]) => (
+                  <li key={key}>
+                    {/* Visualizza la chiave (es. '🌀 giroscopio') e il valore (es. 'integrato...') */}
+                    <strong>{key}:</strong> {value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <span className={`text-sm font-medium px-2 py-1 rounded-full mb-4 ${
             selectedProduct.stock > 5 ? 'bg-green-100 text-green-800' :
             selectedProduct.stock > 0 ? 'bg-yellow-100 text-yellow-800' :

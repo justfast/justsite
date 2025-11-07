@@ -23,7 +23,7 @@ export const loadProductsData = async (): Promise<Product[]> => {
       const mainImage = `/articoli/${id}/image.png`;
 
       // Galleria immagini
-      const gallery: string[] = [mainImage];
+      const gallery: string[] = [];
       for (let g = 1; g <= 10; g++) {
         const imgUrl = `/articoli/${id}/${g}.png`;
         const imgRes = await fetch(imgUrl);

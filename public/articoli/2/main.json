@@ -1,22 +1,37 @@
 {
-  "id": 2,
-  "name": "Nome Prodotto",
-  "price": 0.1,
-  "category": "Categoria",
-  "description": "Prodotto di test. inserisci la escrizione qui",
+  "id": 1762524672324,
+  "name": "Versione App",
+  "price": 35,
+  "category": "RC FPV",
+  "description": "Un’esperienza di guida autentica in formato tascabile.\nComandi e vedi direttamente dallo smartphone, con controlli proporzionali precisi e reattivi.\nLa telecamera FPV offre una visuale in prima persona realistica e coinvolgente.\nOgni unità è sottoposta a test completi di funzionamento e qualità prima di essere spedita.",
   "features": [
-    "feature 1",
-    "feature 2",
-    "feature 3"
+    "🚚 Spedizione Veloce Gratuita",
+    "🎮 controllo: app ",
+    "📸 telecamera: Wi-Fi FPV 720p"
   ],
   "specifications": {
-    "Specifica 1": "Valore",
-    "Velocità": "65km/h"
+    "🔋 autonomia":" circa 15 min",
+    "⚙️ motore": "micro coreless ad alte prestazioni",
+    "🛞 sospensioni": "anteriori indipendenti",
+    "💡 luci": "anteriori, posteriori e sotto-illuminazione LED",
+    "🚀 velocità": "3 modalità di marcia",
+    "🔌 ricarica": "USB Type-C rapida",
+    "🚗 scala": "1:64",
+    "🌀 giroscopio integrato": "per stabilità e drift precisi"
   },
-  "image": "5.png",
+  "image": "main.png",
   "gallery": [
+    "1.png",
+    "2.png",
+    "3.png",
+    "4.png",
+    "5.png",
+    "6.png",
     "7.png",
+    "8.png",
     "9.png",
-    "11.png"
+    "10.png",
+    "11.png",
+    "12.png"
   ]
 }
