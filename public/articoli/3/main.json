@@ -1,0 +1,17 @@
+{
+  "id": 3,
+  "name": "test",
+  "price": 50,
+  "category": "racing",
+  "description": "dsffsdd",
+  "features": [
+    ""
+  ],
+  "specifications": {},
+  "image": "black_banner.JPG",
+  "gallery": [
+    "lino icon.png",
+    "Lino pitch deck.png",
+    "mobile-welcome copy.png"
+  ]
+}
