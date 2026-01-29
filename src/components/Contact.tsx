@@ -66,18 +66,21 @@ const Contact: React.FC<ContactProps> = ({ userEmail }) => {
     });
   };
 
+
+
+  // change here ---------------------------
   const contactInfo = [
     {
       icon: <Phone className="h-6 w-6" />,
       title: 'Telefono',
-      value: '3914750406',
-      link: 'tel:3914750406'
+      value: '393285329562',
+      link: 'tel:393285329562'
     },
     {
       icon: <Mail className="h-6 w-6" />,
       title: 'Email',
-      value: 'gianni.mancarella@gmail.com',
-      link: 'mailto:gianni.mancarella@gmail.com'
+      value: 'alepetrini69@gmail.com',
+      link: 'mailto:alepetrini69@gmail.com'
     },
     {
       icon: <MapPin className="h-6 w-6" />,

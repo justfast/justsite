@@ -55,7 +55,6 @@ const Homepage: React.FC<HomepageProps> = ({ products, onAddToCart, onProductCli
       <p>
         &copy; {2025} | Developed by Edoardo Sorgentone
       </p>
-      {/* Opzionale: puoi aggiungere qui il link al tuo portfolio o LinkedIn */}
       {
       <p className="mt-1">
         <a 
