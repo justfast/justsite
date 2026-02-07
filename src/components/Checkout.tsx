@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, CreditCard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, CreditCard, Loader2 } from 'lucide-react';
 import { sendEventBookingEmail } from '../config/emailjs';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -20,7 +18,6 @@ interface CheckoutProps {
   onClose: () => void;
 }
 
-// decrementa lo stock su Firebase dopo un ordine completato
 const decreaseStock = async (items: CartItem[]) => {
   try {
     const updates = items.map(async (item) => {
@@ -30,72 +27,81 @@ const decreaseStock = async (items: CartItem[]) => {
       });
     });
     await Promise.all(updates);
-    console.log('Stock aggiornato correttamente su Firebase!');
   } catch (err) {
     console.error('Errore aggiornando lo stock:', err);
   }
 };
 
-const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
-  const navigate = useNavigate();
+const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
   const [shippingData, setShippingData] = useState({
-    name: '',
-    address: '',
-    city: '',
-    zip: '',
-    country: '',
-    phone: ''
+    name: '', address: '', city: '', zip: '', country: '', phone: ''
   });
+  const [checkoutId, setCheckoutId] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setShippingData({ ...shippingData, [e.target.name]: e.target.value });
-  };
-
   const isFormValid = Object.values(shippingData).every(v => v.trim() !== '');
 
-  const createOrder = (data: any, actions: any) => {
-    const itemsSummary = items.map(item => `${item.name} x${item.quantity}`).join(', ');
-    const shippingSummary = `Nome: ${shippingData.name}, Via: ${shippingData.address}, Città: ${shippingData.city}, CAP: ${shippingData.zip}, Paese: ${shippingData.country}, Telefono: ${shippingData.phone}, Prodotti: ${itemsSummary}`;
+  // 1. Funzione per creare il checkout tramite la tua API su Vercel
+  const createSumUpCheckout = async () => {
+    if (!isFormValid || checkoutId || isInitializing) return;
 
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: total.toFixed(2) },
-        description: shippingSummary.substring(0, 250)
-      }]
-    });
-  };
-
-  const onApprove = async (data: any, actions: any) => {
+    setIsInitializing(true);
     try {
-      const details = await actions.order.capture();
-      alert(`Pagamento completato! Grazie ${details.payer.name.given_name}`);
-      await decreaseStock(items);
-      await sendEventBookingEmail({
-        data_evento: new Date().toLocaleString(),
-        email: 'gianni.mancarella@gmail.com',
-        ore: items.length,
-        prezzo: total,
-        dettagli: `Dettagli spedizione:
-              Nome: ${shippingData.name}
-              Indirizzo: ${shippingData.address}, ${shippingData.city}, ${shippingData.zip}, ${shippingData.country}
-              Telefono: ${shippingData.phone}
-              Prodotti:
-              ${items.map(i => `- ${i.name} x${i.quantity} (${(i.price * i.quantity).toFixed(2)}€)`).join('\n')}
-              Totale ordine: €${total.toFixed(2)}`,
-        richiesta_data: new Date().toLocaleString()
+      const response = await fetch('/api/sumup-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: total,
+          currency: 'EUR',
+        }),
       });
-      onClose();
+      const data = await response.json();
+      
+      if (data.id) {
+        setCheckoutId(data.id);
+        mountSumUpWidget(data.id);
+      }
     } catch (err) {
-      console.error('Errore durante il pagamento o invio email:', err);
-      alert('Si è verificato un errore. Riprova.');
+      console.error("Errore creazione checkout:", err);
+      alert("Errore tecnico nella creazione dell'ordine.");
+    } finally {
+      setIsInitializing(false);
     }
   };
 
-  const onError = (err: any) => {
-    console.error('Errore PayPal:', err);
-    alert('Si è verificato un errore durante il pagamento. Riprova.');
+  // 2. Funzione per montare il widget fisico di SumUp
+  const mountSumUpWidget = (id: string) => {
+    if ((window as any).SumUpCard) {
+      (window as any).SumUpCard.mount({
+        id: 'sumup-card-default',
+        checkoutId: id,
+        onResponse: async (type: string, body: any) => {
+          // Successo: lo stato può essere 'success' o 'PAID' in base alla risposta
+          if (type === 'success' || body.status === 'PAID') {
+            await handleOrderCompletion();
+          }
+        },
+      });
+    }
+  };
+
+  const handleOrderCompletion = async () => {
+    await decreaseStock(items);
+    await sendEventBookingEmail({
+      data_evento: new Date().toLocaleString(),
+      email: 'gianni.mancarella@gmail.com',
+      ore: items.length,
+      prezzo: total,
+      dettagli: `Spedizione: ${shippingData.name}, ${shippingData.address}. Prodotti: ${items.map(i => i.name).join(', ')}`,
+      richiesta_data: new Date().toLocaleString()
+    });
+    alert('Pagamento completato con successo!');
+    onClose();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setShippingData({ ...shippingData, [e.target.name]: e.target.value });
   };
 
   return (
@@ -110,7 +116,7 @@ const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
             Torna al carrello
           </button>
           <h2 className="text-xl font-bold text-gray-900">Checkout</h2>
-          <div className="w-20"></div>
+          <div className="w-10"></div>
         </div>
 
         {/* Shipping Form */}
@@ -121,90 +127,51 @@ const CheckoutInner: React.FC<CheckoutProps> = ({ items, onClose }) => {
               key={field}
               type="text"
               name={field}
-              placeholder={field === 'name' ? 'Nome e Cognome' :
-                          field === 'address' ? 'Via e numero civico' :
-                          field === 'city' ? 'Città' :
-                          field === 'zip' ? 'CAP' :
-                          field === 'country' ? 'Paese' :
-                          'Numero di telefono'}
+              placeholder={field === 'name' ? 'Nome e Cognome' : field.toUpperCase()}
               value={shippingData[field as keyof typeof shippingData]}
               onChange={handleChange}
-              className="w-full border rounded p-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full border rounded p-2 text-gray-900 focus:ring-2 focus:ring-blue-600 outline-none"
             />
           ))}
-          {!isFormValid && <p className="text-red-600 text-sm mt-1">Compila tutti i campi per poter procedere al pagamento</p>}
         </div>
 
         {/* Order Summary */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Riepilogo ordine</h3>
-          <div className="space-y-3">
-            {items.map(item => (
-              <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-200">
-                <div className="flex items-center space-x-3">
-                  <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
-                  <div>
-                    <p className="font-medium text-gray-900">{item.name}</p>
-                    <p className="text-sm text-gray-600">Colore: {item.color}</p>
-                    <p className="text-sm text-gray-600">Quantità: {item.quantity}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">€{(item.price * item.quantity).toFixed(2)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between items-center pt-4 border-t border-gray-300 mt-4">
+        <div className="mb-6 border-t pt-4">
+          <div className="flex justify-between items-center mb-4">
             <span className="text-lg font-semibold text-gray-900">Totale:</span>
-            <span className="text-2xl font-bold text-red-600">€{total.toFixed(2)}</span>
+            <span className="text-2xl font-bold text-blue-600">€{total.toFixed(2)}</span>
           </div>
         </div>
 
-        {/* Payment */}
+        {/* Payment Section */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Metodo di pagamento</h3>
-          <PayPalButtons
-            fundingSource="card"
-            createOrder={createOrder}
-            onApprove={onApprove}
-            onError={onError}
-            style={{ layout: 'vertical', color: 'black', shape: 'rect', label: 'pay' }}
-            disabled={!isFormValid}
-          />
-
-          <p className="text-sm text-gray-600 mt-3 text-center">
-            Pagamento sicuro e protetto tramite PayPal
-          </p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Pagamento</h3>
+          
+          {!isFormValid ? (
+            <div className="p-3 bg-gray-100 text-gray-500 text-sm rounded text-center">
+              Compila tutti i campi sopra per procedere
+            </div>
+          ) : !checkoutId ? (
+            <button 
+              onClick={createSumUpCheckout}
+              disabled={isInitializing}
+              className="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition flex items-center justify-center"
+            >
+              {isInitializing ? <Loader2 className="animate-spin mr-2" /> : 'Paga con Carta'}
+            </button>
+          ) : (
+            <div id="sumup-card-default">
+              {/* Qui viene iniettato il widget di SumUp */}
+            </div>
+          )}
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <CreditCard className="h-4 w-4" />
-            <span>I tuoi dati di pagamento sono protetti con crittografia SSL</span>
-          </div>
+        <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-2 text-sm text-gray-600">
+          <CreditCard className="h-4 w-4" />
+          <span>Transazione sicura crittografata via SumUp</span>
         </div>
-
       </div>
     </div>
-  );
-};
-
-// Wrapper con PayPalScriptProvider
-const Checkout: React.FC<CheckoutProps> = (props) => {
-  // 👉 Inserisci qui il tuo client-id (sandbox o live, quello che vuoi usare)
-  const PAYPAL_CLIENT_ID = "AXdjP5lUjnZKZ5qCBphInIzSk1-tf-TCAF_JYoN25OZBysN6DqtN04WeTie7sXxSOQ0cpqW1I1KvIHPM";
-
-  return (
-    <PayPalScriptProvider
-      options={{
-        "client-id": PAYPAL_CLIENT_ID,
-        currency: "EUR",
-        intent: "capture",
-      }}
-    >
-      <CheckoutInner {...props} />
-    </PayPalScriptProvider>
   );
 };
 
