@@ -13,7 +13,7 @@ export interface Product {
 
 export const loadProductsData = async (): Promise<Product[]> => {
   const products: Product[] = [];
-  const MAX_SCAN = 300; // numero massimo di ID da controllare
+  const MAX_SCAN = 35; // numero massimo di ID da controllare
   for (let id = 1; id <= MAX_SCAN; id++) {
     try {
       const mainRes = await fetch(`/articoli/${id}/main.json`);
