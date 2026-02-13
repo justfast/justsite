@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, CreditCard, Loader2 } from 'lucide-react';
 import { sendEventBookingEmail } from '../config/emailjs';
 import { doc, updateDoc, increment } from 'firebase/firestore';
@@ -36,12 +36,13 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
   });
   const [checkoutId, setCheckoutId] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false); // Flag per evitare esecuzioni multiple
+  
+  const processingRef = useRef(false); // Ref per sicurezza extra in handleOrderCompletion
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const isFormValid = Object.values(shippingData).every(v => v.trim() !== '');
 
-  // 1. Gestione del montaggio del widget tramite useEffect
-  // Questo si attiva SOLO quando checkoutId cambia e il div è stato renderizzato
   useEffect(() => {
     if (checkoutId && (window as any).SumUpCard) {
       const container = document.getElementById('sumup-card-default');
@@ -51,14 +52,41 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
           id: 'sumup-card-default',
           checkoutId: checkoutId,
           onResponse: async (type: string, body: any) => {
+            // Logica di sicurezza: non ci fidiamo solo di 'success' o del body del frontend
             if (type === 'success' || body.status === 'PAID') {
-              await handleOrderCompletion();
+              await verifyAndCompleteOrder(checkoutId);
             }
           },
         });
       }
     }
-  }, [checkoutId]); // Osserva il cambiamento di checkoutId
+  }, [checkoutId]);
+
+  // FUNZIONE CRITICA: Verifica lato server prima di confermare
+  const verifyAndCompleteOrder = async (id: string) => {
+    if (processingRef.current) return;
+    processingRef.current = true;
+    setIsProcessing(true);
+
+    try {
+      // 1. Chiamata al tuo backend per verificare lo stato reale su SumUp
+      const verifyRes = await fetch(`/api/verify-sumup?checkoutId=${id}`);
+      const verifyData = await verifyRes.json();
+
+      if (verifyData.status === 'PAID') {
+        await handleOrderCompletion();
+      } else {
+        alert("Il pagamento non risulta confermato. Se i soldi sono stati scalati, contatta l'assistenza.");
+        processingRef.current = false;
+        setIsProcessing(false);
+      }
+    } catch (err) {
+      console.error("Errore verifica pagamento:", err);
+      alert("Errore durante la verifica del pagamento.");
+      processingRef.current = false;
+      setIsProcessing(false);
+    }
+  };
 
   const createSumUpCheckout = async () => {
     if (!isFormValid || checkoutId || isInitializing) return;
@@ -71,16 +99,16 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
         body: JSON.stringify({
           amount: total,
           currency: 'EUR',
+          // Passa anche un riferimento interno se possibile
         }),
       });
       const data = await response.json();
       
       if (data.id) {
-        // Qui cambiamo solo lo stato. Il montaggio avverrà nell'useEffect sopra.
         setCheckoutId(data.id);
       }
     } catch (err) {
-      console.error("Errore:", err);
+      console.error("Errore creazione checkout:", err);
       alert("Errore tecnico nella creazione dell'ordine.");
     } finally {
       setIsInitializing(false);
@@ -94,10 +122,11 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
       email: 'gianni.mancarella@gmail.com',
       ore: items.length,
       prezzo: total,
-      dettagli: `Spedizione: ${shippingData.name}. Prodotti: ${items.map(i => i.name).join(', ')}`,
+      dettagli: `Spedizione: ${shippingData.name}. Indirizzo: ${shippingData.address}, ${shippingData.city}. Prodotti: ${items.map(i => i.name).join(', ')}`,
       richiesta_data: new Date().toLocaleString()
     });
-    alert('Pagamento completato con successo!');
+    
+    alert('Pagamento completato e ordine registrato!');
     onClose();
   };
 
@@ -110,7 +139,14 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
       <div className="absolute inset-0 bg-black bg-opacity-40" onClick={onClose} />
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 z-50">
         
-        {/* Header */}
+        {/* Overlay di caricamento durante la verifica finale */}
+        {isProcessing && (
+          <div className="absolute inset-0 bg-white bg-opacity-80 z-[60] flex flex-col items-center justify-center">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-2" />
+            <p className="text-gray-900 font-medium">Verifica pagamento in corso...</p>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-6">
           <button onClick={onClose} className="flex items-center text-gray-600 hover:text-gray-800">
             <ArrowLeft className="h-5 w-5 mr-2" /> Torna al carrello
@@ -119,7 +155,6 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
           <div className="w-10"></div>
         </div>
 
-        {/* Form e Riepilogo (omessi per brevità, rimangono uguali) */}
         <div className="mb-6 space-y-3">
             {['name','address','city','zip','country','phone'].map((field) => (
                 <input
@@ -141,7 +176,6 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
           </div>
         </div>
 
-        {/* Pagamento */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Pagamento</h3>
           
@@ -155,10 +189,9 @@ const Checkout: React.FC<CheckoutProps> = ({ items, onClose }) => {
               disabled={isInitializing}
               className="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 flex items-center justify-center"
             >
-              {isInitializing ? <Loader2 className="animate-spin mr-2" /> : 'Paga con Carta'}
+              {isInitializing ? <Loader2 className="animate-spin mr-2" /> : 'Procedi al pagamento'}
             </button>
           ) : (
-            /* Il div ora appare appena checkoutId è presente */
             <div id="sumup-card-default" className="min-h-[250px]"></div>
           )}
         </div>

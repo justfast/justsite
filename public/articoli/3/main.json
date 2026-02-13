@@ -1,0 +1,20 @@
+{
+  "id": 3,
+  "name": "Drone Top",
+  "price": 79,
+  "category": "Droni",
+  "description": "",
+  "features": [
+    "🚚 Spedizione Veloce Gratuita",
+    "🕹️ Smart Control Pro Screen",
+    "🔋 Long Life Battery"
+  ],
+  "specifications": {},
+  "image": "image.png",
+  "gallery": [
+    "1.png",
+    "2.png",
+    "3.png",
+    "4.png"
+  ]
+}

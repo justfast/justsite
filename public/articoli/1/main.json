@@ -1,36 +1,20 @@
 {
   "id": 1,
-  "name": "TEST-NON ACQUISTARE",
+  "name": "Drone 1- NON ACQUISTARE,TEST",
   "price": 1,
-  "category": "RC FPV",
-  "description": "Un modello compatto che trasmette sensazioni autentiche di guida.\n\nIl telecomando ergonomico, con comandi proporzionali, restituisce un controllo preciso e naturale.\n\n La visuale in prima persona tramite telecamera FPV rende ogni movimento immersivo.Ogni unità è sottoposta a test completi di funzionamento e qualità prima di essere spedita.",
+  "category": "Droni",
+  "description": "",
   "features": [
-    "🚚 Spedizione Veloce Gratuita",
-    "🎮 controllo: app + telecomando fisico",
-    "📸 telecamera: Wi-Fi FPV 720p"
-
+    "🕹️ Screen Remote Control",
+    "🛬 One Click Takeoff/Landing",
+    "🚚 Spedizione Veloce Gratuita"
   ],
-  "specifications": {
-    "🌀 giroscopio":"integrato per stabilità e traiettorie pulite",
-    "⚙️ motore": "micro coreless ad alte prestazioni",
-    "🔋 autonomia": "circa 15 min",
-    "🛞 sospensioni": "anteriori indipendenti",
-    "💡 luci": "anteriori, posteriori e sotto-illuminazione LED",
-    "🚀 velocità": "3 modalità di marcia",
-    "🔌 ricarica": "USB Type-C rapida",
-    "🚗 scala": "1:64"
-  },
+  "specifications": {},
   "image": "image.png",
   "gallery": [
     "1.png",
-    "2.png",
     "3.png",
-    "4.png",
-    "5.png",
-    "6.png",
-    "7.png",
-    "8.png",
-    "9.png",
-    "11.png"
+    "2.png",
+    "4.png"
   ]
 }
