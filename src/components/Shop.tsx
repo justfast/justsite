@@ -75,6 +75,7 @@ useEffect(() => {
                 alt={product.name}
                 className="h-full object-contain p-4 transition-transform duration-300 ease-in-out hover:scale-105 select-none"
                 draggable="false"
+                loading="lazy"
               />
               <div className="absolute top-3 left-3 bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold">Racing</div>
             </div>
@@ -136,6 +137,7 @@ useEffect(() => {
                         <img
                           src={img}
                           alt={`${selectedProduct.name} ${i + 1}`}
+                          loading="lazy"
                           className="w-full h-[350px] object-contain p-4"
                         />
                       </div>
