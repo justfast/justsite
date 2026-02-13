@@ -21,25 +21,35 @@ const Shop: React.FC<ShopProps> = ({ onAddToCart }) => {
     setTimeout(() => setShowAddedPopup(false), 2000);
   };
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await loadProductsData();
-        const productsWithStock = await Promise.all(
-          data.map(async (product) => {
-            const stock = await getStockById(product.id.toString());
-            return { ...product, stock };
-          })
-        );
-        setProductsData(productsWithStock);
-      } catch (error) {
-        console.error("❌ Errore caricando prodotti:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      // 1. Carica immediatamente i dati base degli articoli
+      const baseData = await loadProductsData();
+      setProductsData(baseData); // Mostra subito le card!
+      setLoading(false);         // Togliamo il loading generale qui
+
+      // 2. Carica lo stock in "background" senza bloccare l'utente
+      baseData.forEach(async (product, index) => {
+        try {
+          const stock = await getStockById(product.id.toString());
+          
+          // Aggiorna solo il prodotto specifico nello stato
+          setProductsData(current => 
+            current.map(p => p.id === product.id ? { ...p, stock } : p)
+          );
+        } catch (err) {
+          console.error(`Errore stock prodotto ${product.id}:`, err);
+        }
+      });
+    } catch (error) {
+      console.error("❌ Errore caricando prodotti:", error);
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, []);
 
   if (loading) return <p className="text-center mt-10 text-white">Caricamento prodotti...</p>;
 
