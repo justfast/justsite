@@ -54,7 +54,7 @@ const Shop: React.FC<ShopProps> = ({ onAddToCart }) => {
     return () => { isMounted = false; };
   }, []);
 
-  if (loading) return <p className="text-center mt-10 text-white font-black italic uppercase italic">JUSTFAST LOADING...</p>;
+  if (loading) return <p className="text-center mt-10 text-white font-black italic uppercase italic">LOADING PRODUCTS...</p>;
 
   return (
     <section className="py-20 bg-zinc-950 min-h-screen flex flex-col items-center">
