@@ -29,10 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
 
   const navItems = [
-    { label: 'Shop', href: '#shop' },
-    { label: 'Eventi', href: '#events' },
-    { label: 'Tecnologia', href: '#technology' },
-    { label: 'Contatti', href: '#contact' }
+    { label: 'Shop', href: '#shop' }
   ];
 
   const handleLogoClick = () => {
