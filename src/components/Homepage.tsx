@@ -1,9 +1,6 @@
 import React from 'react';
-import Hero from './Hero';
 import Shop from './Shop';
-import About from './About';
-import Technology from './Technology';
-import Events from './Events';
+
 import Contact from './Contact';
 import { Product } from '../App';
 
@@ -18,7 +15,7 @@ const Homepage: React.FC<HomepageProps> = ({ products, onAddToCart, onProductCli
     <div className="w-full">
       {/* Hero Section */}
       <section id="home">
-        <Hero />
+      
       </section>
       
       {/* Shop Section */}
@@ -29,6 +26,8 @@ const Homepage: React.FC<HomepageProps> = ({ products, onAddToCart, onProductCli
           onProductClick={onProductClick}
         />
       </section>
+
+      <Contact></Contact>
       
     
 
