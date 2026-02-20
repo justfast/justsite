@@ -158,11 +158,7 @@ function App() {
                 onProductClick={setSelectedProduct}
               />
             } />
-            <Route path="/about" element={<About />} />
-            <Route path="/technology" element={<Technology />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/account" element={<Account />} />
+    
             <Route path="/checkout" element={
               <Checkout 
                 cartItems={cartItems}
